@@ -1,3 +1,13 @@
+
+import "core-js/stable";
+import "regenerator-runtime/runtime";
+import "isomorphic-fetch";
+import 'element-remove';
+
+if (window.NodeList && !NodeList.prototype.forEach) {
+    NodeList.prototype.forEach = Array.prototype.forEach;
+}
+
 let fetchedQuestions;
 
 (function init(){
@@ -7,18 +17,20 @@ let fetchedQuestions;
 
 function chooseDifficulty(){
     const diff = document.querySelectorAll('#difficulty li');
-    diff.forEach( li => li.addEventListener( 'click', e => difficultyPicked(e.target, diff) ));
+    diff.forEach( li => {
+        li.addEventListener( 'click', e => difficultyPicked(e.target, diff) )
+    });
 }
 
 function difficultyPicked(target, diff){
     emptyDifficultyBox(diff);
     
-    target.style = `background-color:#142533`;
+    target.style.cssText = `background-color:#142533`;
     target.id = 'checked';
 }
 
 function emptyDifficultyBox(diff){
-    diff.forEach( diffBox => diffBox.style = `background-color:none` );
+    diff.forEach( diffBox => diffBox.style.cssText = `background-color:none` );
     document.querySelector('.medium').style.backgroundColor = 'transparent';
 }
 
@@ -176,20 +188,20 @@ function renderCheckButton(){
 function handlingClicks(e){
     Array.from(e.target.parentNode.children).forEach( child => {
 
-        child.addEventListener('mouseover', e => e.target.style = `background-color:#142533`);
+        child.addEventListener('mouseover', e => e.target.style.cssText = `background-color:#142533`);
         child.addEventListener('mouseout', onOutChange);
 
         child.dataset.answerChecked = '';
-        child.style = `background-color:transparent`;
+        child.style.cssText = `background-color:transparent`;
     });
 
     e.target.dataset.answerChecked = 'checked';
-    e.target.style = `background-color:#142533`;
+    e.target.style.cssText = `background-color:#142533`;
 }
 
 function onOutChange(e){
     if(e.target.dataset.answerChecked === undefined || e.target.dataset.answerChecked === ''){
-        e.target.style = `background-color:transparent`;
+        e.target.style.cssText = `background-color:transparent`;
     }
 }
 
@@ -204,16 +216,16 @@ function checkAnswers(){
   for(let i = 0; i < 10; i++){
       if(fetchedQuestions.results[i].correct_answer === userAnswers[i].textContent){
         //CHECK IS USER'S ANSWERS ARE CORRECT
-        userAnswers[i].style = `background-color:#339966`;
+        userAnswers[i].style.cssText = `background-color:#339966`;
         correctAnswers++;
       }
       else{
         //FILL WITH RED BACKGROUND WRONG ANSWERS 
-        userAnswers[i].style = `background-color:#990000`;
+        userAnswers[i].style.cssText = `background-color:#990000`;
         //FILL WITH GREEN BACKGROUND CORRECT ANSWERS
         document.querySelectorAll(`#quiz_${i} li`).forEach( li => {
             if(li.textContent === fetchedQuestions.results[i].correct_answer){
-                li.style = `background-color:#339966`;
+                li.style.cssText = `background-color:#339966`;
             }
         });
       }
@@ -243,6 +255,7 @@ function checkForEmptyAnswers(){
     message.textContent = 'You should answer for all the questions';
     btn.textContent = 'Ok';
 
+    img.alt = 'Logo'
     img.src = '../img/test-quiz.png';
     imgBox.appendChild(img);
 
@@ -302,3 +315,28 @@ function hideLoading(){
         document.body.removeChild(document.querySelector('#loading'))
     }, 400);
 }
+
+//append() polyfill
+(function (arr) {
+    arr.forEach(function (item) {
+      if (item.hasOwnProperty('append')) {
+        return;
+      }
+      Object.defineProperty(item, 'append', {
+        configurable: true,
+        enumerable: true,
+        writable: true,
+        value: function append() {
+          var argArr = Array.prototype.slice.call(arguments),
+            docFrag = document.createDocumentFragment();
+          
+          argArr.forEach(function (argItem) {
+            var isNode = argItem instanceof Node;
+            docFrag.appendChild(isNode ? argItem : document.createTextNode(String(argItem)));
+          });
+          
+          this.appendChild(docFrag);
+        }
+      });
+    });
+  })([Element.prototype, Document.prototype, DocumentFragment.prototype]);
