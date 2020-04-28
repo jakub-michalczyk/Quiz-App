@@ -1,8 +1,7 @@
-
-import "core-js/stable";
+/*import "core-js/stable";
 import "regenerator-runtime/runtime";
 import "isomorphic-fetch";
-import 'element-remove';
+import 'element-remove';*/
 
 if (window.NodeList && !NodeList.prototype.forEach) {
     NodeList.prototype.forEach = Array.prototype.forEach;
@@ -25,13 +24,13 @@ function chooseDifficulty(){
 function difficultyPicked(target, diff){
     emptyDifficultyBox(diff);
     
-    target.style.cssText = `background-color:#142533`;
+    target.style.backgroundColor = `#142533`;
     target.id = 'checked';
 }
 
 function emptyDifficultyBox(diff){
-    diff.forEach( diffBox => diffBox.style.cssText = `background-color:none` );
-    document.querySelector('.medium').style.backgroundColor = 'transparent';
+    diff.forEach( diffBox => diffBox.removeAttribute("style") );
+    document.querySelector('.medium') !== null ? document.querySelector('.medium').className = "answers hoverHandling" : null;
 }
 
 function createQuiz(){
@@ -76,19 +75,13 @@ async function getQuestion(difficulty, category){
 function renderQuiz(obj){
     const container = document.createElement('div');
     const link = document.createElement('a');
-    const header = document.createElement('h1');
     let counter = 0;
 
-    link.href = '../html/index.html';
-    header.className = 'appTitle';
-    header.textContent = 'Quiz App';
-
-    link.appendChild(header);
-
+    container.id = 'quizBox';
+    link.href = "../html/index.html";
+    link.innerHTML = "<h1 class='appTitle'>Quiz App</h1>";
     document.querySelector('#wrapper').innerHTML = '';
     document.querySelector('#wrapper').append(link, container);
-
-    container.id = 'quizBox';
 
     //RENDER INCORRECT ANSWERS
     for(let i = 0; i < 10; i++){
@@ -134,22 +127,22 @@ function fixOrder(id){
     let correct = '';
     let counter = 0;
     const random = rand();
-    const route = document.querySelectorAll(`#quiz_${id} li`);
+    const dir = document.querySelectorAll(`#quiz_${id} li`);
 
     //LOOP THROUGH ANSWERS AND STORE THEIR VLAUES IN ARRAY AND EMPTY THEM
     for(let k = 0; k < 3; k++){
-        arr.push(route[k].textContent);
-        route[k].textContent = '';
+        arr.push(dir[k].textContent);
+        dir[k].textContent = '';
     }
 
     //THE LAST ONE HAS A CORRECT VALUE ASSIGN IT TO VARIABLE
-    correct = route[3].textContent
-    route[3].textContent = '';
+    correct = dir[3].textContent
+    dir[3].textContent = '';
     //GET A RANDOM ANSWER AND GIVE IT A CORRECT VALUE
-    route[random].textContent = correct;
+    dir[random].textContent = correct;
 
     //LOOP THROUGH ALL LI AND FOR THE ONES WITH NO VALUE GIVE A INCORRECT ANSWERS
-    route.forEach( li => {
+    dir.forEach( li => {
         if(li.textContent === ''){
             li.textContent = arr[counter++];
         }
@@ -222,7 +215,7 @@ function checkAnswers(){
       else{
         //FILL WITH RED BACKGROUND WRONG ANSWERS 
         userAnswers[i].style.cssText = `background-color:#990000`;
-        //FILL WITH GREEN BACKGROUND CORRECT ANSWERS
+        //FILL WITH GREEN BACKGROUND CORRECT ANSWERS WHERE USER ANSWERED WRONG
         document.querySelectorAll(`#quiz_${i} li`).forEach( li => {
             if(li.textContent === fetchedQuestions.results[i].correct_answer){
                 li.style.cssText = `background-color:#339966`;
@@ -237,29 +230,22 @@ function checkAnswers(){
 
 function checkForEmptyAnswers(){
     const popup = document.createElement('div');
-    const message = document.createElement('div');
     const overlayer = document.createElement('div');
-    const btn = document.createElement('div');
-    const imgBox = document.createElement('div');
-    const img = new Image();
-
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    message.id = 'message';
+    popup.innerHTML = 
+        `
+            <h1 class="appTitle">
+                Quiz App
+            </h1>
+            <div id="message">You should answer for all the questions</div>
+            <div id="popupBtn">Ok</div>
+        `;
+
     overlayer.id = 'overlayer';
-    btn.id = 'popupBtn';
     popup.id = 'popup';
-    imgBox.id = 'imgBox';
 
-    message.textContent = 'You should answer for all the questions';
-    btn.textContent = 'Ok';
-
-    img.alt = 'Logo'
-    img.src = '../img/test-quiz.png';
-    imgBox.appendChild(img);
-
-    popup.append(imgBox, message, btn);
     setTimeout(() => {
         document.body.style.overflowY = 'hidden';
         document.body.append(overlayer, popup);
@@ -275,14 +261,14 @@ function removePopup(){
 
 function viewingResults(count){
     const overFixer = document.createElement('div');
-    const userResultPoints = document.createElement('div');
-    const userResultPercent = document.createElement('div');
     const wrap = document.createElement('div');
 
-    wrap.append(userResultPoints, userResultPercent)
+    wrap.innerHTML = 
+        `<div>You answered correct for <span>${count}/10</span> questions</div>
+         <div>It is <span>${(count / 10 ) * 100}%</span></div>
+        `;
+
     wrap.id = 'resultsWrapper';
-    userResultPoints.innerHTML = `You answered <span>${count}/10</span> questions`;
-    userResultPercent.innerHTML = `It is <span>${(count / 10 ) * 100}%</span>`;
     overFixer.id = 'overFixer';
     
     document.querySelector('#checkContainer').removeChild(document.querySelector('#checkButton'));
